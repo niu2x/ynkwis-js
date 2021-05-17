@@ -101,10 +101,14 @@ Accept-Ranges: bytes
 		console.log('readData');
 		var message
 		[message, this.localBuffer] = Message.unpack(this.localBuffer);
-		if(message != null && message.action == 'data'){
-			this.remoteSocket.write(Buffer.from(message.data, 'base64'));
-			// console.log('write to remote:', message.data);
+		while(message != null){
+			if(message.action == 'data'){
+				this.remoteSocket.write(Buffer.from(message.data, 'base64'));
+				// console.log('write to remote:', message.data);
+			}
+			[message, this.localBuffer] = Message.unpack(this.localBuffer);
 		}
+		
 		if(this.remoteBuffer.length > 0){
 			this.localSocket.write(Message.pack({
 				'action': 'data',

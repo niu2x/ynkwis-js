@@ -31,6 +31,9 @@ class Wolf {
 
 		this.localSocket = localSocket;
 
+		this.reqBytes = 0
+		this.resBytes = 0
+
 		this.localSocket.on('close', ()=> this.destroy());
 		this.localSocket.on('error', ()=> {});
 		this.localSocket.on('data', (data)=>{
@@ -43,6 +46,7 @@ class Wolf {
 
 		this.process = this.readAuthHeader;
 		this.process()
+
 	}
 
 	destroy(){
@@ -162,22 +166,29 @@ class Wolf {
 		console.log('readData');
 		if(this.localBuffer.length > 0 ){
 			var clientData = this.localBuffer;
+			this.reqBytes += clientData.length;
+
 			this.localBuffer = Buffer.from('');
-			this.remoteSocket.write(Message.pack({
+			var message = Message.pack({
 				'action' : 'data',
 				'data' : clientData.toString('base64'),
-			}));
-
-			// console.log("write to remote: ", clientData.toString('ascii'));
+			});
+			this.remoteSocket.write(message);
 		}
 
 
 		var message
+		var oldLen = this.remoteBuffer.length;
 		[message, this.remoteBuffer] = Message.unpack(this.remoteBuffer);
-		if(message != null && message.action == 'data'){
-			this.localSocket.write(Buffer.from(message.data, 'base64'));
-			// console.log("write to local: ", message.data);
+		while(message != null){
+			if(message.action == 'data'){
+				this.localSocket.write(Buffer.from(message.data, 'base64'));
+			}
+			[message, this.remoteBuffer] = Message.unpack(this.remoteBuffer);
 		}
+		this.resBytes += oldLen - this.remoteBuffer.length;
+
+		console.log(`reqBytes: ${this.reqBytes}; resBytes: ${this.resBytes}`);
 	}
 
 	connectToRemote() {
