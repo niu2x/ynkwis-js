@@ -58,7 +58,7 @@ class Wolf {
 	}
 
 	readAuthHeader(){
-		console.log('readAuthHeader');
+		//console.log('readAuthHeader');
 		if(this.localBuffer.length >=2 ){
 			this.methodNum = this.localBuffer.readUInt8(1);
 			this.localBuffer = this.localBuffer.slice(2);
@@ -68,7 +68,7 @@ class Wolf {
 	}
 
 	readAuthMethods() {
-		console.log('readAuthMethods');
+		//console.log('readAuthMethods');
 		if(this.localBuffer.length >= this.methodNum ){
 			this.localBuffer = this.localBuffer.slice(this.methodNum);
 			this.writeAuthResponse();
@@ -78,13 +78,13 @@ class Wolf {
 	}
 
 	writeAuthResponse() {
-		console.log('writeAuthResponse');
+		//console.log('writeAuthResponse');
 		var response = Buffer.from([0x05, 0x00]);
 		this.localSocket.write(response);
 	}
 
 	readTargetInfo1() {
-		console.log('readTargetInfo1');
+		//console.log('readTargetInfo1');
 		if(this.localBuffer.length >= 4 ){
 			this.command = this.localBuffer.readUInt8(1);
 			this.addrType = this.localBuffer.readUInt8(3);
@@ -107,7 +107,7 @@ class Wolf {
 	}
 
 	readTargetInfo2() {
-		console.log('readTargetInfo2');
+		//console.log('readTargetInfo2');
 		if(this.addrType == 1) {
 			if(this.localBuffer.length >= 4 ){
 				this.ipv4 = this.localBuffer.slice(0, 4);
@@ -148,7 +148,7 @@ class Wolf {
 	}
 
 	readTargetInfo3() {
-		console.log('readTargetInfo3');
+		//console.log('readTargetInfo3');
 		if(this.localBuffer.length >= 2 ){
 			this.port = this.localBuffer.readUInt16BE(0);
 			this.clientRequest = Buffer.concat([
@@ -163,7 +163,7 @@ class Wolf {
 	}
 
 	readData() {
-		console.log('readData');
+		//console.log('readData');
 		if(this.localBuffer.length > 0 ){
 			var clientData = this.localBuffer;
 			this.reqBytes += clientData.length;
@@ -188,11 +188,11 @@ class Wolf {
 		}
 		this.resBytes += oldLen - this.remoteBuffer.length;
 
-		console.log(`reqBytes: ${this.reqBytes}; resBytes: ${this.resBytes}`);
+		//console.log(`reqBytes: ${this.reqBytes}; resBytes: ${this.resBytes}`);
 	}
 
 	connectToRemote() {
-		console.log('connectToRemote');
+		//console.log('connectToRemote');
 		this.remoteSocket = net.connect(remotePort, remoteHost);
 		this.remoteSocket.on('connect', () => {
 			this.writeTargetToRemote()
@@ -210,7 +210,7 @@ class Wolf {
 	}
 
 	writeTargetToRemote() {
-		console.log('writeTargetToRemote');
+		//console.log('writeTargetToRemote');
 		var m = {}
 		if(this.addrType == 1){
 			m.host = this.ipv4;
@@ -227,7 +227,7 @@ class Wolf {
 	}
 
 	readRemoteReply() {
-		console.log('readRemoteReply');
+		//console.log('readRemoteReply');
 		var message
 		[message, this.remoteBuffer] = Message.unpack(this.remoteBuffer);
 		if(message != null && message.action == 'confirm') {
